@@ -20,7 +20,7 @@ jobs:
 
       - name: Install dependencies && test
         run: |
-          cd /apps/be
+          cd ./apps/be
           yarn install --frozen-lockfile
           yarn test
 
@@ -34,14 +34,11 @@ jobs:
           node-version: "16.x"
           cache: "yarn"
 
-      - name: Go to backend directory
-        run: cd ./apps/be
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Building...
-        run: yarn build
+      - name: Install dependencies && build
+        run: |
+          cd ./apps/be
+          yarn install --frozen-lockfile
+          yarn build
 
       - name: SSH initialization
         env:
@@ -59,5 +56,6 @@ jobs:
           EC2_INSTANCE_PRIVATE_KEY: ${{ secrets.EC2_INSTANCE_PRIVATE_KEY }}
           EC2_INSTANCE_PROJECT_PATH: ${{ secrets.EC2_INSTANCE_PROJECT_PATH }}
         run: |
+          cd ./apps/be
           rsync -avzP ./dist package.json yarn.lock deploy.sh "${EC2_INSTANCE_USER}"@"${EC2_INSTANCE_IP_V4}":"${EC2_INSTANCE_PROJECT_PATH}" --delete
           ssh "${EC2_INSTANCE_USER}"@"${EC2_INSTANCE_IP_V4}" "source ~/.nvm/nvm.sh && cd ${EC2_INSTANCE_PROJECT_PATH} && pm2 start"
