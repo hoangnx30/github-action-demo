@@ -33,6 +33,7 @@ jobs:
           yarn test
 
   build-and-deploy:
+    needs: run-test
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
