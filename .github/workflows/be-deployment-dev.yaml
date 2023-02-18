@@ -45,7 +45,7 @@ jobs:
           EC2_INSTANCE_PRIVATE_KEY: ${{ secrets.EC2_INSTANCE_PRIVATE_KEY }}
         run: |
           eval $(ssh-agent -s)
-          touch ~/.ssh/known_hosts
+          mkdir -p ~/.ssh && touch ~/.ssh/known_hosts
           ssh-keyscan -H "${EC2_INSTANCE_IP_V4}" >> ~/.ssh/known_hosts
           ssh-add <(echo "${EC2_INSTANCE_PRIVATE_KEY}")
 
