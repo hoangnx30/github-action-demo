@@ -18,14 +18,11 @@ jobs:
         with:
           node-version: "16.x"
 
-      - name: Go to backend directory
-        run: cd ./apps/be
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Run test
-        run: yarn test
+      - name: Install dependencies && test
+        run: |
+          cd /apps/be
+          yarn install --frozen-lockfile
+          yarn test
 
   build-and-deploy:
     runs-on: ubuntu-20.04
@@ -35,7 +32,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "16.x"
-          cache: 'yarn'
+          cache: "yarn"
 
       - name: Go to backend directory
         run: cd ./apps/be
@@ -47,15 +44,15 @@ jobs:
         run: yarn build
 
       - name: SSH initialization
-        env: 
+        env:
           EC2_INSTANCE_IP_V4: ${{ secrets.EC2_INSTANCE_IP_V4 }}
-          EC2_INSTANCE_PRIVATE_KEY: ${{ secrets.EC2_INSTANCE_PRIVATE_KEY }} 
+          EC2_INSTANCE_PRIVATE_KEY: ${{ secrets.EC2_INSTANCE_PRIVATE_KEY }}
         run: |
           eval $(ssh-agent -s)
           ssh-keyscan -H "${EC2_INSTANCE_IP_V4}" >> ~/.ssh/known_hosts
           ssh-add <(echo "${EC2_INSTANCE_PRIVATE_KEY}")
-      
-      - name: Copy artifact to server 
+
+      - name: Copy artifact to server
         env:
           EC2_INSTANCE_IP_V4: ${{ secrets.EC2_INSTANCE_IP_V4 }}
           EC2_INSTANCE_USER: ${{ secrets.EC2_INSTANCE_USER }}
@@ -64,7 +61,3 @@ jobs:
         run: |
           rsync -avzP ./dist package.json yarn.lock deploy.sh "${EC2_INSTANCE_USER}"@"${EC2_INSTANCE_IP_V4}":"${EC2_INSTANCE_PROJECT_PATH}" --delete
           ssh "${EC2_INSTANCE_USER}"@"${EC2_INSTANCE_IP_V4}" "source ~/.nvm/nvm.sh && cd ${EC2_INSTANCE_PROJECT_PATH} && pm2 start"
-
-
-
-      
