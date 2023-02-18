@@ -39,23 +39,18 @@ jobs:
           yarn install --frozen-lockfile
           yarn build
 
-      - name: SSH initialization
-        env:
-          EC2_INSTANCE_IP_V4: ${{ secrets.EC2_INSTANCE_IP_V4 }}
-          EC2_INSTANCE_PRIVATE_KEY: ${{ secrets.EC2_INSTANCE_PRIVATE_KEY }}
-        run: |
-          eval $(ssh-agent -s)
-          mkdir -p ~/.ssh && touch ~/.ssh/known_hosts
-          ssh-keyscan -H "${EC2_INSTANCE_IP_V4}" >> ~/.ssh/known_hosts
-          ssh-add <(echo "${EC2_INSTANCE_PRIVATE_KEY}")
-
-      - name: Copy artifact to server
+      - name: Deploy
         env:
           EC2_INSTANCE_IP_V4: ${{ secrets.EC2_INSTANCE_IP_V4 }}
           EC2_INSTANCE_USER: ${{ secrets.EC2_INSTANCE_USER }}
           EC2_INSTANCE_PRIVATE_KEY: ${{ secrets.EC2_INSTANCE_PRIVATE_KEY }}
           EC2_INSTANCE_PROJECT_PATH: ${{ secrets.EC2_INSTANCE_PROJECT_PATH }}
         run: |
+          eval $(ssh-agent -s)
+          mkdir -p ~/.ssh && touch ~/.ssh/known_hosts
+          echo "${EC2_INSTANCE_PRIVATE_KEY}"
+          ssh-keyscan -H "${EC2_INSTANCE_IP_V4}" >> ~/.ssh/known_hosts
+          ssh-add <(echo "${EC2_INSTANCE_PRIVATE_KEY}")
           cd ./apps/be
           rsync -avzP ./dist package.json yarn.lock deploy.sh "${EC2_INSTANCE_USER}"@"${EC2_INSTANCE_IP_V4}":"${EC2_INSTANCE_PROJECT_PATH}" --delete
           ssh "${EC2_INSTANCE_USER}"@"${EC2_INSTANCE_IP_V4}" "source ~/.nvm/nvm.sh && cd ${EC2_INSTANCE_PROJECT_PATH} && pm2 start"
