@@ -52,5 +52,5 @@ jobs:
           ssh-keyscan -H "${EC2_INSTANCE_IP_V4}" >> ~/.ssh/known_hosts
           ssh-add <(echo "${EC2_INSTANCE_PRIVATE_KEY}")
           cd ./apps/be
-          rsync -avzP ./dist package.json yarn.lock deploy.sh "${EC2_INSTANCE_USER}"@"${EC2_INSTANCE_IP_V4}":"${EC2_INSTANCE_PROJECT_PATH}" --delete
+          rsync -avzP ./dist package.json yarn.lock deploy.sh ecosystem.config.js "${EC2_INSTANCE_USER}"@"${EC2_INSTANCE_IP_V4}":"${EC2_INSTANCE_PROJECT_PATH}" --delete
           ssh "${EC2_INSTANCE_USER}"@"${EC2_INSTANCE_IP_V4}" "source ~/.nvm/nvm.sh && cd ${EC2_INSTANCE_PROJECT_PATH} && bash deploy.sh"
