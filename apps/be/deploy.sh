@@ -1,2 +1,2 @@
-yarn install --production
+yarn install --production --frozen-lockfile
 pm2 start

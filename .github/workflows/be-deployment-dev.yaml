@@ -1,4 +1,4 @@
-name: Github action demo front end deployment
+name: Github action demo back end deployment
 
 on:
   push:
